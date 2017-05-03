@@ -18,8 +18,43 @@ if [ ! -f ./.env  ] && [ -f ./.env.example ]; then
     cp .env.example .env
 fi
 
-#cd laradock-lojascomhistoria
-#docker-compose up -d nginx postgres-postgis
-#docker-compose exec workspace bash -c "composer install"
-#docker-compose exec workspace bash -c "php artisan migrate"
-#cd ..
+echo "Starting server and database!"
+cd $path
+docker-compose up -d nginx postgres-postgis mysql
+cd ..
+
+if [ -f ./.env  ]; then
+    echo "Found Laravel project";
+    while true; do
+        read -p "Do you wish to run composer install?" yn
+        case $yn in
+            [Yy]* )
+                cd $path;
+                docker-compose exec workspace bash -c "composer install";
+                cd ..;
+                break;;
+            [Nn]* )
+                break;;
+            * )
+                echo "Please answer yes or no.";;
+        esac
+    done
+
+    while true; do
+        read -p "Do you wish to refresh the database?" yn
+        case $yn in
+            [Yy]* )
+                cd $path;
+                docker-compose exec workspace bash -c "php artisan migrate";
+                cd ..;
+                break;;
+            [Nn]* )
+                break;;
+            * )
+                echo "Please answer yes or no.";;
+        esac
+    done
+
+
+fi
+
