@@ -18,6 +18,21 @@ if [ ! -f ./.env  ] && [ -f ./.env.example ]; then
     cp .env.example .env
 fi
 
+for port in $(seq 8000 9000); do
+    echo -n "Testing port $port: "
+    portopen=$(nc -z localhost $port; echo $?)
+    if [ $portopen -eq 1 ]; then
+        echo "Open"
+        newport=$port;
+        break;
+    else
+        echo "Closed"
+    fi
+done
+
+echo "HTTP_PORT=${newport}" >> $path/.env
+
+
 echo "Starting server and database!"
 cd $path
 docker-compose up -d nginx postgres-postgis mysql
@@ -54,7 +69,6 @@ if [ -f ./.env  ]; then
                 echo "Please answer yes or no.";;
         esac
     done
-
-
 fi
 
+open http://localhost:$newport
