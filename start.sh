@@ -1,4 +1,3 @@
-
 env=${PWD##*/}
 path="./devenvironment-${env}"
 
@@ -8,8 +7,6 @@ if [ ! -d $path ]; then
 	echo "Cloning dev environment";
 	git clone https://github.com/joaojoyce/laradock $path
 	cp $path/env-example $path/.env
-	echo "POSTGRES_DB=${env}" >> $path/.env
-	echo "MYSQL_DATABASE=${env}" >> $path/.env
 #	rm -rf .git
 fi
 
@@ -35,32 +32,23 @@ echo "HTTP_PORT=${newport}" >> $path/.env
 
 echo "Starting server and database!"
 cd $path
-docker-compose up -d nginx postgres-postgis mysql
+docker-compose up -d nginx postgres-postgis
 cd ..
 
 if [ -f ./.env  ]; then
-    echo "Found Laravel project";
-    while true; do
-        read -p "Do you wish to run composer install?" yn
-        case $yn in
-            [Yy]* )
-                cd $path;
-                docker-compose exec workspace bash -c "composer install";
-                cd ..;
-                break;;
-            [Nn]* )
-                break;;
-            * )
-                echo "Please answer yes or no.";;
-        esac
-    done
+
+    #RUN COMPOSER!!!
+    cd $path;
+    docker-compose exec workspace bash -c "composer install";
+    cd ..;
 
     while true; do
         read -p "Do you wish to refresh the database?" yn
         case $yn in
             [Yy]* )
                 cd $path;
-                docker-compose exec workspace bash -c "php artisan migrate";
+                docker-compose exec workspace bash -c "php artisan migrate:refresh";
+                docker-compose exec workspace bash -c "php artisan db:seed";
                 cd ..;
                 break;;
             [Nn]* )
@@ -69,6 +57,7 @@ if [ -f ./.env  ]; then
                 echo "Please answer yes or no.";;
         esac
     done
+
 fi
 
 open http://localhost:$newport
