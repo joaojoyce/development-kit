@@ -1,5 +1,8 @@
 env=${PWD##*/}
 path="./devenvironment-${env}"
+pathtoproject=${PWD#/Users/*/}
+
+
 
 echo $path
 
@@ -7,7 +10,11 @@ if [ ! -d $path ]; then
 	echo "Cloning dev environment";
 	git clone https://github.com/joaojoyce/laradock $path
 	cp $path/env-example $path/.env
-#	rm -rf .git
+	echo "APPLICATION=/mnt/${pathtoproject}" >> $path/.env
+	echo "DEV_PATH_FROM_CONTAINER=/mnt/${pathtoproject}/$path" >> $path/.env
+	echo "NGINX_SITES_PATH=/mnt/${pathtoproject}/$path/nginx/sites/" >> $path/.env
+	echo "NGINX_HOST_LOG_PATH=/mnt/${pathtoproject}/$path/logs/nginx/" >> $path/.env
+	#	rm -rf .git
 fi
 
 if [ ! -f ./.env  ] && [ -f ./.env.example ]; then
